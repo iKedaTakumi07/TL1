@@ -14,6 +14,38 @@ bl_info = {
     "category": "Object"
 }
 
+#オペレータ 頂点を伸ばす
+class MYADDON_OT_stretch_vertex(bpy.types.Operator):
+    bl_idname = "myaddon.myaddon_ot_stretch_vertex"
+    bl_label = "頂点を伸ばす"
+    bl_description = "頂点座標を引っ張って伸ばします"
+    #リドゥ、アンドゥ可能オプション
+    bl_options = {'REGISTER','UNDO'}
+
+    #メニューを実行したときに呼ばれるコールバック関数
+    def execute(self, context):
+        bpy.data.objects["Cube"].data.vertices[0].co.x += 1.0
+        print("頂点を伸ばしました。")
+
+        #オペレータの命令終了を通知
+        return{'FINISHED'}
+    
+#オペレータ ICO球生成
+class MYADDON_OT_create_ico_sphere(bpy.types.Operator):
+    bl_idname = "myaddon.myaddon_ot_create_object"
+    bl_label = "ICP球生成"
+    bl_description = "ICO球を生成します"
+    #リドゥ、アンドゥ可能オプション
+    bl_options = {'REGISTER','UNDO'}
+
+      #メニューを実行したときに呼ばれるコールバック関数
+    def execute(self, context):
+        bpy.ops.mesh.primitive_ico_sphere_add()
+        print("ICO球を生成しました。")
+
+        #オペレータの命令終了を通知
+        return{'FINISHED'}
+
 #トップバーの拡張メニュー
 class TOPBAR_MT_my_menu(bpy.types.Menu):
 #self : 呼び出し元のクラスインスタンス。C++でいうthisポインタ
@@ -29,6 +61,14 @@ class TOPBAR_MT_my_menu(bpy.types.Menu):
     #サブメニューの描画
     def draw(self, context):
 
+        #トップバーの「エディタメニュー」に項目(オペレータ)を追加
+        self.layout.operator(MYADDON_OT_stretch_vertex.bl_idname,text = MYADDON_OT_stretch_vertex.bl_label)
+
+         #トップバーの「エディタメニュー」に項目(オペレータ)を追加
+        self.layout.operator(MYADDON_OT_create_ico_sphere.bl_idname,text = MYADDON_OT_create_ico_sphere.bl_label)
+
+        self.layout.separator()
+
         #トップバーの「エディタメニュー」に項目(オペレーター)を追加
         self.layout.operator("wm.url_open_preset", text = "Manual", icon = "HELP")
           #区切り線
@@ -39,10 +79,11 @@ class TOPBAR_MT_my_menu(bpy.types.Menu):
     def submenu(self, context):
         #ID指定でサブメニューを追加
         self.layout.menu(TOPBAR_MT_my_menu.bl_idname)
-      
 
 #Blenderに登場するクラスリスト
 classes =(
+    MYADDON_OT_stretch_vertex,
+    MYADDON_OT_create_ico_sphere,
     TOPBAR_MT_my_menu,
 )
 
