@@ -272,7 +272,7 @@ class OBJECT_PT_collider(bpy.types.Panel):
             self.layout.prop(context.object, '["collider_size"]',text = "Size")
         else:
              #プロパティがなければ、ぷろぱちぃ追加ボタンを表示
-            self.layout.operator(MYADDOM_OT_add_collider.bl_idname)
+            self.layout.operator(MYADDON_OT_add_collider.bl_idname)
 
 #パネル ファイル名
 class OBJECT_PT_file_name(bpy.types.Panel):
@@ -337,6 +337,12 @@ class TOPBAR_MT_my_menu(bpy.types.Menu):
         #区切り線
         self.layout.separator()
 
+        #トップバーの「エディタメニュー」に項目(オペレータ)を追加
+        self.layout.operator(OBJECT_PT_file_name.bl_idname,text = OBJECT_PT_file_name.bl_label)
+
+        #区切り線
+        self.layout.separator()
+    
         #トップバーの「エディタメニュー」に項目(オペレーター)を追加
         self.layout.operator("wm.url_open_preset", text = "Manual", icon = "HELP")
        
