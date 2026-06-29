@@ -238,11 +238,11 @@ class DrawCollider:
         batch.draw(shader)
 
 #オペレータ カスタムプロパティ['collider']追加
-class MYADDOM_OT_add_collider(bpy.types.Operator):
+class MYADDON_OT_add_collider(bpy.types.Operator):
     bl_idname = "myaddon.myaddon_ot_add_collider"
     bl_label = "コライダー 追加"
     bl_description = "['collider']カスタムプロパティを追加します"
-    bl_optopns = {"REGISTER", "UNDO"}
+    bl_options = {"REGISTER", "UNDO"}
 
     def execute(self,context):
 
@@ -256,7 +256,7 @@ class MYADDOM_OT_add_collider(bpy.types.Operator):
 #パネル コライダー
 class OBJECT_PT_collider(bpy.types.Panel):
     bl_iname = "OBJECT_PT_collider"
-    bl_label = "Cpllider"
+    bl_label = "Collider"
     bl_space_type = "PROPERTIES"
     bl_region_type = "WINDOW"
     bl_context = "object"
@@ -337,19 +337,6 @@ class TOPBAR_MT_my_menu(bpy.types.Menu):
         #区切り線
         self.layout.separator()
 
-        #トップバーの「エディタメニュー」に項目(オペレータ)を追加
-        self.layout.operator(OBJECT_PT_file_name.bl_idname,text = OBJECT_PT_file_name.bl_label)
-
-        #区切り線
-        self.layout.separator()
-        
-        #トップバーの「エディタメニュー」に項目(オペレータ)を追加
-      
-
-
-        #区切り線
-        self.layout.separator()
-
         #トップバーの「エディタメニュー」に項目(オペレーター)を追加
         self.layout.operator("wm.url_open_preset", text = "Manual", icon = "HELP")
        
@@ -367,7 +354,7 @@ classes =(
     TOPBAR_MT_my_menu,
     MYADDON_OT_add_filename,
     OBJECT_PT_file_name,
-    MYADDOM_OT_add_collider,
+    MYADDON_OT_add_collider,
     OBJECT_PT_collider,
 )
 
