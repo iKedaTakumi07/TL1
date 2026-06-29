@@ -337,12 +337,6 @@ class TOPBAR_MT_my_menu(bpy.types.Menu):
         #区切り線
         self.layout.separator()
 
-        #トップバーの「エディタメニュー」に項目(オペレータ)を追加
-        self.layout.operator(OBJECT_PT_file_name.bl_idname,text = OBJECT_PT_file_name.bl_label)
-
-        #区切り線
-        self.layout.separator()
-    
         #トップバーの「エディタメニュー」に項目(オペレーター)を追加
         self.layout.operator("wm.url_open_preset", text = "Manual", icon = "HELP")
        
