@@ -33,10 +33,12 @@ private:
     std::unique_ptr<Skybox> skydox;
 
     // 3dモデル
-    std::unique_ptr<Model> model;
-    std::unique_ptr<Model> model2;
-    std::unique_ptr<Object3d> object3d;
-    std::unique_ptr<Object3d> object3d2;
+    std::unique_ptr<Model> modelA;
+    std::unique_ptr<Model> modelB;
+    std::unique_ptr<Model> modelC;
+    std::unique_ptr<Model> modelD;
+    std::unique_ptr<Model> modelG;
+    std::vector<std::unique_ptr<Object3d>> staticObjects_;
 
     // スプライト
     std::list<std::unique_ptr<Sprite>> sprites;

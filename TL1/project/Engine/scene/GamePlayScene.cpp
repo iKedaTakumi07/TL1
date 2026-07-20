@@ -4,6 +4,7 @@
 #include "../base/WinApp.h"
 
 #include "../2d/SpriteCommon.h"
+#include "../base/LevelLoader.h"
 #include "../base/TextureManager.h"
 
 #include "../3d/Model.h"
@@ -11,8 +12,8 @@
 #include "../3d/Object3d.h"
 #include "../3d/Object3dCommon.h"
 
-#include "../3d/CPUParticle/ParticleEmitter.h"
 #include "../3d/CPUParticle/CPUParticleManager.h"
+#include "../3d/CPUParticle/ParticleEmitter.h"
 
 #include "../3d/Skybox/SkyBoxCommon.h"
 #include "../3d/Skybox/Skybox.h"
@@ -37,6 +38,7 @@ void GamePlayScene::Initialize()
 {
 
     TextureManager::getInstance()->LoadTexture("resources/uvChecker.png");
+    TextureManager::getInstance()->LoadTexture("resources/scene/1x1white.png");
     TextureManager::getInstance()->LoadTexture("resources/monsterBall.png");
     TextureManager::getInstance()->LoadTexture("resources/rostock_laage_airport_4k.dds");
 
@@ -58,36 +60,80 @@ void GamePlayScene::Initialize()
 
     ModelManager::GetInstance()->LoadModel("Plane.obj");
     ModelManager::GetInstance()->LoadModel("axis.obj");
+    ModelManager::GetInstance()->LoadModel("scene/sceneBuild_A.obj");
+    ModelManager::GetInstance()->LoadModel("scene/sceneBuild_B.obj");
+    ModelManager::GetInstance()->LoadModel("scene/sceneBuild_C.obj");
+    ModelManager::GetInstance()->LoadModel("scene/sceneBuild_D.obj");
+    ModelManager::GetInstance()->LoadModel("scene/sceneGround.obj");
 
-    object3d = std::make_unique<Object3d>();
-    object3d->Initialize();
-    object3d->SetCamera(BaseScene::GetCamera());
+    modelA = std::make_unique<Model>();
+    modelA->Initialize("resources/scene", "sceneBuild_A.obj");
+    modelA->SetEvnTexturefilePath(skydox->GetTextureFilePath());
 
-    model = std::make_unique<Model>();
-    model->Initialize("resources", "plane.obj");
-    model->SetEvnTexturefilePath(skydox->GetTextureFilePath());
-    object3d->SetModel(model.get());
+    modelB = std::make_unique<Model>();
+    modelB->Initialize("resources/scene", "sceneBuild_B.obj");
+    modelB->SetEvnTexturefilePath(skydox->GetTextureFilePath());
 
-    object3d2 = std::make_unique<Object3d>();
-    object3d2->Initialize();
-    object3d2->SetCamera(BaseScene::GetCamera());
+    modelC = std::make_unique<Model>();
+    modelC->Initialize("resources/scene", "sceneBuild_C.obj");
+    modelC->SetEvnTexturefilePath(skydox->GetTextureFilePath());
 
-    model2 = std::make_unique<Model>();
-    model2->Initialize("resources", "axis.obj");
-    model2->SetEvnTexturefilePath(skydox->GetTextureFilePath());
-    object3d2->SetModel(model2.get());
+    modelD = std::make_unique<Model>();
+    modelD->Initialize("resources/scene", "sceneBuild_D.obj");
+    modelD->SetEvnTexturefilePath(skydox->GetTextureFilePath());
 
+    modelG = std::make_unique<Model>();
+    modelG->Initialize("resources/scene", "sceneGround.obj");
+    modelG->SetEvnTexturefilePath(skydox->GetTextureFilePath());
+
+    LevelData* levelData = LevelLoader::Load("resources/scene/", "scene", ".json");
+    if (levelData) {
+        for (auto& objectData : levelData->objects) {
+
+            Model* targetModel = nullptr;
+
+            // 名前（ファイル名）に応じて割り当てるモデルを決定
+            if (objectData.fileName == "BuildA") {
+                targetModel = modelA.get();
+            } else if (objectData.fileName == "BuildB") {
+                targetModel = modelB.get();
+            } else if (objectData.fileName == "BuildC") {
+                targetModel = modelD.get();
+            } else if (objectData.fileName == "BuildD") {
+                targetModel = modelC.get();
+            } else if (objectData.fileName == "Ground") {
+                targetModel = modelG.get();
+            }
+
+            // モデルが確定したらオブジェクトを生成
+            if (targetModel) {
+                auto staticObj = std::make_unique<Object3d>();
+                staticObj->Initialize();
+                staticObj->SetCamera(BaseScene::GetCamera());
+                staticObj->SetModel(targetModel);
+                staticObj->SetRotate(objectData.rotation);
+                staticObj->SetScale(objectData.scaling);
+                staticObj->SetTranslate(objectData.translation);
+
+                staticObjects_.push_back(std::move(staticObj));
+            }
+        }
+
+        delete levelData; // メモリ解放
+    }
+
+    // パーティクル
     CPUParticleManager::getInstance()->CreateParticleGroup("pori", "resources/circle.png", ParticleMeshType::kPlane);
     CPUParticleManager::getInstance()->CreateParticleGroup("Plane", "resources/uvChecker.png", ParticleMeshType::kPlane);
 
     // 板ポリ
-    Transform emitter {};
+    Transform emitter { };
     emitter.translate = { 0.0f, 0.0f, 0.0f };
     emitter.rotate = { 0.0f, 0.0f, 0.0f };
     emitter.scale = { 1.0f, 1.0f, 1.0f };
     // particleEmitter = std::make_unique<ParticleEmitter>("pori", emitter, 1.0f, 3,true);
 
-    Transform emitterPlane {};
+    Transform emitterPlane { };
     emitterPlane.translate = { 4.0f, 4.0f, 0.0f };
     emitterPlane.rotate = { 0.0f, 0.0f, 0.0f };
     emitterPlane.scale = { 1.0f, 1.0f, 1.0f };
@@ -117,12 +163,9 @@ void GamePlayScene::Update()
     skydox->SetCamera(camera);
     skydox->Update();
 
-    object3d->Update();
-
-    object3d2->Update();
-    Vector3 rotate2 = object3d2->GetRotate();
-
-    object3d2->SetRotate(rotate2);
+    for (auto& object : staticObjects_) {
+        object->Update();
+    }
 
     // particleEmitter->Update();
     particleEmitterPlane->Update();
@@ -136,8 +179,10 @@ void GamePlayScene::Draw()
     //
     // モデルデータ
     //
-    object3d->Draw();
-    object3d2->Draw();
+
+    for (auto& object : staticObjects_) {
+        object->Draw();
+    }
 
     SkyBoxCommon::GetInstance()->PrepareObjectDraw();
     // skydox->Draw();

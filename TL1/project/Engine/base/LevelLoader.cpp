@@ -3,8 +3,6 @@
 #include <cassert>
 #include <fstream>
 
-
-
 LevelData* LevelLoader::Load(const std::string& DefaultBaseDirectory, const std::string& fileName, const std::string Extension)
 {
     // フルパスを得る
@@ -53,8 +51,10 @@ LevelData* LevelLoader::Load(const std::string& DefaultBaseDirectory, const std:
             if (object.contains("file_name")) {
                 // ファイル名
                 objectData.fileName = object["file_name"].get<std::string>();
+            }
 
-                // トランスフォームのパラメータ読み込み
+            // トランスフォームのパラメータ読み込み
+            if (object.contains("transform")) {
                 nlohmann::json& transform = object["transform"];
 
                 // 平行移動
